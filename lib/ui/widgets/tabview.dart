@@ -21,6 +21,7 @@ class Tab {
   bool _persisted = false;
 
   DivElement _label;
+  DivElement _dirtyIndicator;
   DivElement _labelCaption;
   ButtonElement _closeButton;
   DivElement _pageContainer;
@@ -35,6 +36,9 @@ class Tab {
       e.preventDefault();
     });
 
+    _dirtyIndicator = new DivElement()..classes.add('tabview-tablabel-saveState');
+    _dirtyIndicator.innerHtml = '&bull;';
+
     _labelCaption = new DivElement()..classes.add('tabview-tablabel-caption');
 
     _closeButton = new ButtonElement()
@@ -48,7 +52,7 @@ class Tab {
       e.stopPropagation();
       e.preventDefault();
     });
-    _label.children.addAll([_labelCaption, _closeButton]);
+    _label.children.addAll([_dirtyIndicator, _labelCaption, _closeButton]);
     _pageContainer = new DivElement()
         ..classes.add('tabview-page-container')
         ..tabIndex = -1;
@@ -80,6 +84,10 @@ class Tab {
   bool get closable => _label.classes.contains('tabview-tablabel-closable');
   set closable(bool closable) =>
       _label.classes.toggle('tabview-tablabel-closable', closable);
+
+  bool get dirty => _dirtyIndicator.classes.contains('tabview-tablabel-dirty');
+  set dirty(bool value) =>
+      _dirtyIndicator.classes.toggle('tabview-tablabel-dirty', value);
 
   Stream<Tab> get onClose =>
       tabView._onCloseStreamController.stream.where((t) => t == this);

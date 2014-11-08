@@ -25,7 +25,7 @@
    },
    "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA2OvldPjAqgEboHyyZM7GpCMmGMSQ8aExOlQyOhN3C9fDRXqnAN/Ie20TEwD9Eb2CciV3Ru4Gm7PmDnkHzsljD84qLgBdN39FzPGDyViXTS442xTElWRZMZQfJYQpbMpiePL720kTHgLLAcwTgdP9DnvRPrKukIs/U4Y76NFk7NNbsNOc6FWisLJykw2POTB1RR5ZlZrA4Ax1P7kt7qQdomE6i8wy1TA1jDhG8AhEXKRfpyELvJmzyVIyR9uiSHDHCdihiS5oyjADjmmbklvL7Ns0cSAgEX/lWN8UX8r17zoKZzJ0MkmCQ5Nlfql8qUtn2oZXaHztkkAcXCxkq9/37QIDAQAB",
    "manifest_version": 2,
-   "minimum_chrome_version": "36",
+   "minimum_chrome_version": "37",
    "name": "__MSG_app_name__",
    "oauth2": {
       "client_id": "450494089748-t8dpd0irtkfhh76g5dq54gjnut5ipggp.apps.googleusercontent.com",
@@ -34,7 +34,7 @@
    "offline_enabled": true,
    "permissions": [ "http://*/*", "https://*/*", "identity", "clipboardRead", "clipboardWrite", "developerPrivate", {
       "fileSystem": [ "write", "retainEntries", "directory" ]
-   }, "management", "syncFileSystem", "system.network", "storage", "unlimitedStorage", "contextMenus", "usb", {
+   }, "management", "nativeMessaging", "syncFileSystem", "system.network", "storage", "unlimitedStorage", "contextMenus", "usb", {
       "usbDevices": [ {
          "description": "0x22b8/0x2e62 Moto X (XT1053)",
          "productId": 11874,
@@ -147,12 +147,12 @@
       }
    },
    "update_url": "https://clients2.google.com/service/update2/crx",
-   "version": "0.16.3226",
+   "version": "0.17.3361",
    "webview": {
       "partitions": [ {
          "accessible_resources": [ "*" ],
          "name": "cde-polymer-designer"
       } ]
    },
-   "x-spark-revision": "b0e33ad8f2c81c3cc55410055e5b2251a5c36739"
+   "x-spark-revision": "2bdc4f11d2fdc554c057fa16a448827c6cd4fb65"
 }

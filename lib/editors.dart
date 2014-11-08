@@ -118,8 +118,13 @@ class EditorManager implements EditorProvider, NavigationLocationProvider {
         event =
             new ResourceChangeEvent.fromList(event.changes, filterRename: true);
         for (ChangeDelta delta in event.changes) {
-          if (delta.isDelete && delta.resource.isFile) {
+          if (delta.isDelete) {
             _handleFileDeleted(delta.resource);
+            if (delta.deletions.isNotEmpty) {
+              for (ChangeDelta change in delta.deletions) {
+                _handleFileDeleted(change.resource);
+              }
+            }
           } else if (delta.isChange && delta.resource.isFile) {
             _handleFileChanged(delta.resource);
           }
@@ -131,10 +136,12 @@ class EditorManager implements EditorProvider, NavigationLocationProvider {
   PreferenceStore get _prefStore => _prefs.prefsStore;
 
   File get currentFile => _currentState != null ? _currentState.file : null;
+  Editor get currentEditor => getEditor(currentFile);
 
   Iterable<File> get files => _openedEditorStates.map((s) => s.file);
   Future<bool> get loaded => _loadedCompleter.future;
   Iterable<Editor> get editors => _editorMap.values;
+  Editor getEditor(File file) => _editorMap[file];
 
   Stream<File> get onSelectedChange => _selectedController.stream;
 
@@ -360,7 +367,10 @@ class EditorManager implements EditorProvider, NavigationLocationProvider {
     }
   }
 
-  void _handleFileDeleted(File file) {
+  void _handleFileDeleted(Resource file) {
+    if (!file.isFile) {
+      return;
+    }
     // If the file is open in an editor, the editor will take care of closing.
     if (_editorMap.containsKey(file)) {
       return;
@@ -482,3 +492,58 @@ class _EditorState {
     session = null;
   }
 }
+
+/**
+ * Defines an abstract provider of data (content) from an unknown source,
+ * provides an event to fire upon content changes, and allows the content to be
+ * written to / read from source.
+ */
+abstract class ContentProvider {
+  Stream get onChange;
+  Future write(String content);
+  Future<String> read();
+}
+
+/**
+ * Defines a provider of content from a [File].
+ */
+class FileContentProvider implements ContentProvider {
+  final File file;
+  StreamController _changeController;
+  StreamSubscription _changeSubscription;
+
+  Stream get onChange => _changeController.stream;
+
+  FileContentProvider(this.file) {
+    _changeController = new StreamController.broadcast(onListen: () {
+      _changeSubscription = file.workspace.onResourceChange.listen(
+          (ResourceChangeEvent event) {
+            if (event.modifiedFiles.contains(file)) _changeController.add(null);
+          });
+    }, onCancel: () => _changeSubscription.cancel());
+  }
+
+  Future<String> read() => file.getContents();
+
+  Future write(String content) => file.setContents(content);
+}
+
+/**
+ * Defines a provider of content from an element named [_filename] in a
+ * [PreferenceStore] [_store].
+ */
+class PreferenceContentProvider implements ContentProvider {
+  final PreferenceStore _store;
+  final String _filename;
+
+  StreamController _changeController = new StreamController.broadcast();
+
+  Stream get onChange => _changeController.stream;
+
+  PreferenceContentProvider(this._store, this._filename);
+
+  Future<String> read() => _store.getValue(_filename);
+
+  Future write(String content) => _store.setValue(_filename, content);
+}
+

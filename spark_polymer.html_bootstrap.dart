@@ -20,11 +20,10 @@ import 'package:spark_widgets/spark_progress/spark_progress.dart' as i14;
 import 'package:spark_widgets/spark_splitter/spark_splitter.dart' as i15;
 import 'package:spark_widgets/spark_split_view/spark_split_view.dart' as i16;
 import 'package:spark_widgets/spark_status/spark_status.dart' as i17;
-import 'package:cde_polymer_designer/cde_polymer_designer.dart' as i18;
-import 'lib/ui/commit_message_view/commit_message_view.dart' as i19;
-import 'lib/ui/goto_line_view/goto_line_view.dart' as i20;
-import 'spark_polymer_ui.dart' as i21;
-import 'spark_polymer.dart' as i22;
+import 'lib/ui/commit_message_view/commit_message_view.dart' as i18;
+import 'lib/ui/goto_line_view/goto_line_view.dart' as i19;
+import 'spark_polymer_ui.dart' as i20;
+import 'spark_polymer.dart' as i21;
 import 'package:smoke/smoke.dart' show Declaration, PROPERTY, METHOD;
 import 'package:smoke/static.dart' show useGeneratedCode, StaticConfiguration;
 import 'package:spark_widgets/common/spark_widget.dart' as smoke_0;
@@ -47,12 +46,11 @@ import 'package:spark_widgets/spark_progress/spark_progress.dart' as smoke_16;
 import 'package:spark_widgets/spark_splitter/spark_splitter.dart' as smoke_17;
 import 'package:spark_widgets/spark_split_view/spark_split_view.dart' as smoke_18;
 import 'package:spark_widgets/spark_status/spark_status.dart' as smoke_19;
-import 'package:cde_polymer_designer/cde_polymer_designer.dart' as smoke_20;
-import 'lib/ui/commit_message_view/commit_message_view.dart' as smoke_21;
-import 'package:observe/src/metadata.dart' as smoke_22;
-import 'lib/scm.dart' as smoke_23;
-import 'lib/ui/goto_line_view/goto_line_view.dart' as smoke_24;
-import 'spark_polymer_ui.dart' as smoke_25;
+import 'lib/ui/commit_message_view/commit_message_view.dart' as smoke_20;
+import 'package:observe/src/metadata.dart' as smoke_21;
+import 'lib/scm.dart' as smoke_22;
+import 'lib/ui/goto_line_view/goto_line_view.dart' as smoke_23;
+import 'spark_polymer_ui.dart' as smoke_24;
 abstract class _M0 {} // HtmlElement & Polymer
 abstract class _M1 {} // _M0 & ChangeNotifier
 abstract class _M2 {} // SparkWidget & ChangeNotifier
@@ -71,6 +69,7 @@ void main() {
         #authorEmail: (o) => o.authorEmail,
         #authorName: (o) => o.authorName,
         #autoClose: (o) => o.autoClose,
+        #blurAction: (o) => o.blurAction,
         #cancel: (o) => o.cancel,
         #cancelClickHandler: (o) => o.cancelClickHandler,
         #checkmark: (o) => o.checkmark,
@@ -78,6 +77,7 @@ void main() {
         #collapseEmpty: (o) => o.collapseEmpty,
         #command: (o) => o.command,
         #commitInfo: (o) => o.commitInfo,
+        #contextMenuAction: (o) => o.contextMenuAction,
         #dateString: (o) => o.dateString,
         #defaultMessage: (o) => o.defaultMessage,
         #description: (o) => o.description,
@@ -86,21 +86,25 @@ void main() {
         #directionChanged: (o) => o.directionChanged,
         #disabled: (o) => o.disabled,
         #dismiss: (o) => o.dismiss,
-        #entryPoint: (o) => o.entryPoint,
+        #downAction: (o) => o.downAction,
         #fileFilterInputHandler: (o) => o.fileFilterInputHandler,
         #fileFilterKeydownHandler: (o) => o.fileFilterKeydownHandler,
         #flat: (o) => o.flat,
+        #focusAction: (o) => o.focusAction,
         #handle: (o) => o.handle,
         #handleAnchorClick: (o) => o.handleAnchorClick,
         #handleClick: (o) => o.handleClick,
         #handleKeyDown: (o) => o.handleKeyDown,
         #handleKeyPress: (o) => o.handleKeyPress,
+        #handleModalTransitionEnd: (o) => o.handleModalTransitionEnd,
+        #handleModalTransitionStart: (o) => o.handleModalTransitionStart,
         #headerTitle: (o) => o.headerTitle,
         #hide: (o) => o.hide,
         #horizontal: (o) => o.horizontal,
         #hoverStyle: (o) => o.hoverStyle,
         #icon: (o) => o.icon,
         #iconSize: (o) => o.iconSize,
+        #iconSrc: (o) => o.iconSrc,
         #identifier: (o) => o.identifier,
         #inSelection: (o) => o.inSelection,
         #inSelectionChanged: (o) => o.inSelectionChanged,
@@ -138,6 +142,7 @@ void main() {
         #primary: (o) => o.primary,
         #progressMessage: (o) => o.progressMessage,
         #raised: (o) => o.raised,
+        #raisedButton: (o) => o.raisedButton,
         #responsive: (o) => o.responsive,
         #round: (o) => o.round,
         #secondary: (o) => o.secondary,
@@ -162,10 +167,12 @@ void main() {
         #targetSizeChanged: (o) => o.targetSizeChanged,
         #temporaryMessage: (o) => o.temporaryMessage,
         #tooltip: (o) => o.tooltip,
+        #upAction: (o) => o.upAction,
         #value: (o) => o.value,
         #valueAttr: (o) => o.valueAttr,
         #vertical: (o) => o.vertical,
         #visible: (o) => o.visible,
+        #z: (o) => o.z,
       },
       setters: {
         #active: (o, v) { o.active = v; },
@@ -188,7 +195,6 @@ void main() {
         #direction: (o, v) { o.direction = v; },
         #disabled: (o, v) { o.disabled = v; },
         #dismiss: (o, v) { o.dismiss = v; },
-        #entryPoint: (o, v) { o.entryPoint = v; },
         #flat: (o, v) { o.flat = v; },
         #handle: (o, v) { o.handle = v; },
         #headerTitle: (o, v) { o.headerTitle = v; },
@@ -196,6 +202,7 @@ void main() {
         #hoverStyle: (o, v) { o.hoverStyle = v; },
         #icon: (o, v) { o.icon = v; },
         #iconSize: (o, v) { o.iconSize = v; },
+        #iconSrc: (o, v) { o.iconSrc = v; },
         #inSelection: (o, v) { o.inSelection = v; },
         #indeterminate: (o, v) { o.indeterminate = v; },
         #itemFilter: (o, v) { o.itemFilter = v; },
@@ -238,11 +245,11 @@ void main() {
         #valueAttr: (o, v) { o.valueAttr = v; },
         #vertical: (o, v) { o.vertical = v; },
         #visible: (o, v) { o.visible = v; },
+        #z: (o, v) { o.z = v; },
       },
       parents: {
-        smoke_21.CommitMessageView: _M2,
-        smoke_24.GotoLineView: smoke_0.SparkWidget,
-        smoke_20.CdePolymerDesigner: smoke_1.PolymerElement,
+        smoke_20.CommitMessageView: _M2,
+        smoke_23.GotoLineView: smoke_0.SparkWidget,
         smoke_1.PolymerElement: _M1,
         smoke_0.SparkWidget: smoke_1.PolymerElement,
         smoke_2.SparkButton: smoke_0.SparkWidget,
@@ -262,19 +269,16 @@ void main() {
         smoke_17.SparkSplitter: smoke_0.SparkWidget,
         smoke_19.SparkStatus: smoke_0.SparkWidget,
         smoke_7.SparkToolbar: smoke_0.SparkWidget,
-        smoke_25.SparkPolymerUI: _M2,
+        smoke_24.SparkPolymerUI: _M2,
         _M0: smoke_3.HtmlElement,
         _M1: _M0,
         _M2: smoke_0.SparkWidget,
       },
       declarations: {
-        smoke_21.CommitMessageView: {
-          #commitInfo: const Declaration(#commitInfo, smoke_23.CommitInfo, kind: PROPERTY, annotations: const [smoke_22.reflectable, smoke_22.observable]),
+        smoke_20.CommitMessageView: {
+          #commitInfo: const Declaration(#commitInfo, smoke_22.CommitInfo, kind: PROPERTY, annotations: const [smoke_21.reflectable, smoke_21.observable]),
         },
-        smoke_24.GotoLineView: {},
-        smoke_20.CdePolymerDesigner: {
-          #entryPoint: const Declaration(#entryPoint, String, annotations: const [smoke_1.published]),
-        },
+        smoke_23.GotoLineView: {},
         smoke_1.PolymerElement: {},
         smoke_0.SparkWidget: {},
         smoke_2.SparkButton: {
@@ -366,14 +370,14 @@ void main() {
           #targetSizeChanged: const Declaration(#targetSizeChanged, Function, kind: METHOD),
         },
         smoke_17.SparkSplitter: {
-          #direction: const Declaration(#direction, String, annotations: const [smoke_1.published]),
+          #direction: const Declaration(#direction, String, annotations: const [smoke_0.published_reflected]),
           #directionChanged: const Declaration(#directionChanged, Function, kind: METHOD),
-          #handle: const Declaration(#handle, bool, annotations: const [smoke_1.published]),
-          #locked: const Declaration(#locked, bool, annotations: const [smoke_1.published]),
-          #maxTargetSize: const Declaration(#maxTargetSize, int, annotations: const [smoke_1.published]),
-          #minTargetSize: const Declaration(#minTargetSize, int, annotations: const [smoke_1.published]),
-          #size: const Declaration(#size, int, annotations: const [smoke_1.published]),
-          #targetSize: const Declaration(#targetSize, int, annotations: const [smoke_1.published]),
+          #handle: const Declaration(#handle, bool, annotations: const [smoke_0.published_reflected]),
+          #locked: const Declaration(#locked, bool, annotations: const [smoke_0.published_reflected]),
+          #maxTargetSize: const Declaration(#maxTargetSize, int, annotations: const [smoke_0.published_reflected]),
+          #minTargetSize: const Declaration(#minTargetSize, int, annotations: const [smoke_0.published_reflected]),
+          #size: const Declaration(#size, int, annotations: const [smoke_0.published_reflected]),
+          #targetSize: const Declaration(#targetSize, int, annotations: const [smoke_0.published_reflected]),
           #targetSizeChanged: const Declaration(#targetSizeChanged, Function, kind: METHOD),
         },
         smoke_19.SparkStatus: {
@@ -389,15 +393,15 @@ void main() {
           #spacing: const Declaration(#spacing, String, annotations: const [smoke_1.published]),
           #vertical: const Declaration(#vertical, bool, annotations: const [smoke_1.published]),
         },
-        smoke_25.SparkPolymerUI: {
-          #apkBuildMode: const Declaration(#apkBuildMode, bool, kind: PROPERTY, annotations: const [smoke_22.reflectable, smoke_22.observable]),
-          #appVersion: const Declaration(#appVersion, String, kind: PROPERTY, annotations: const [smoke_22.reflectable, smoke_22.observable]),
-          #chromeOS: const Declaration(#chromeOS, bool, kind: PROPERTY, annotations: const [smoke_22.reflectable, smoke_22.observable]),
-          #developerMode: const Declaration(#developerMode, bool, kind: PROPERTY, annotations: const [smoke_22.reflectable, smoke_22.observable]),
-          #liveDeployMode: const Declaration(#liveDeployMode, bool, kind: PROPERTY, annotations: const [smoke_22.reflectable, smoke_22.observable]),
-          #polymerDesigner: const Declaration(#polymerDesigner, bool, kind: PROPERTY, annotations: const [smoke_22.reflectable, smoke_22.observable]),
-          #showWipProjectTemplates: const Declaration(#showWipProjectTemplates, bool, kind: PROPERTY, annotations: const [smoke_22.reflectable, smoke_22.observable]),
-          #splitViewPosition: const Declaration(#splitViewPosition, int, kind: PROPERTY, annotations: const [smoke_22.reflectable, smoke_1.published]),
+        smoke_24.SparkPolymerUI: {
+          #apkBuildMode: const Declaration(#apkBuildMode, bool, kind: PROPERTY, annotations: const [smoke_21.reflectable, smoke_21.observable]),
+          #appVersion: const Declaration(#appVersion, String, kind: PROPERTY, annotations: const [smoke_21.reflectable, smoke_21.observable]),
+          #chromeOS: const Declaration(#chromeOS, bool, kind: PROPERTY, annotations: const [smoke_21.reflectable, smoke_21.observable]),
+          #developerMode: const Declaration(#developerMode, bool, kind: PROPERTY, annotations: const [smoke_21.reflectable, smoke_21.observable]),
+          #liveDeployMode: const Declaration(#liveDeployMode, bool, kind: PROPERTY, annotations: const [smoke_21.reflectable, smoke_21.observable]),
+          #polymerDesigner: const Declaration(#polymerDesigner, bool, kind: PROPERTY, annotations: const [smoke_21.reflectable, smoke_21.observable]),
+          #showWipProjectTemplates: const Declaration(#showWipProjectTemplates, bool, kind: PROPERTY, annotations: const [smoke_21.reflectable, smoke_21.observable]),
+          #splitViewPosition: const Declaration(#splitViewPosition, int, kind: PROPERTY, annotations: const [smoke_21.reflectable, smoke_1.published]),
           #splitViewPositionChanged: const Declaration(#splitViewPositionChanged, Function, kind: METHOD),
         },
       },
@@ -412,6 +416,7 @@ void main() {
         #authorEmail: r'authorEmail',
         #authorName: r'authorName',
         #autoClose: r'autoClose',
+        #blurAction: r'blurAction',
         #cancel: r'cancel',
         #cancelClickHandler: r'cancelClickHandler',
         #checkmark: r'checkmark',
@@ -419,6 +424,7 @@ void main() {
         #collapseEmpty: r'collapseEmpty',
         #command: r'command',
         #commitInfo: r'commitInfo',
+        #contextMenuAction: r'contextMenuAction',
         #dateString: r'dateString',
         #defaultMessage: r'defaultMessage',
         #description: r'description',
@@ -427,21 +433,25 @@ void main() {
         #directionChanged: r'directionChanged',
         #disabled: r'disabled',
         #dismiss: r'dismiss',
-        #entryPoint: r'entryPoint',
+        #downAction: r'downAction',
         #fileFilterInputHandler: r'fileFilterInputHandler',
         #fileFilterKeydownHandler: r'fileFilterKeydownHandler',
         #flat: r'flat',
+        #focusAction: r'focusAction',
         #handle: r'handle',
         #handleAnchorClick: r'handleAnchorClick',
         #handleClick: r'handleClick',
         #handleKeyDown: r'handleKeyDown',
         #handleKeyPress: r'handleKeyPress',
+        #handleModalTransitionEnd: r'handleModalTransitionEnd',
+        #handleModalTransitionStart: r'handleModalTransitionStart',
         #headerTitle: r'headerTitle',
         #hide: r'hide',
         #horizontal: r'horizontal',
         #hoverStyle: r'hoverStyle',
         #icon: r'icon',
         #iconSize: r'iconSize',
+        #iconSrc: r'iconSrc',
         #identifier: r'identifier',
         #inSelection: r'inSelection',
         #inSelectionChanged: r'inSelectionChanged',
@@ -479,6 +489,7 @@ void main() {
         #primary: r'primary',
         #progressMessage: r'progressMessage',
         #raised: r'raised',
+        #raisedButton: r'raisedButton',
         #responsive: r'responsive',
         #round: r'round',
         #secondary: r'secondary',
@@ -503,10 +514,12 @@ void main() {
         #targetSizeChanged: r'targetSizeChanged',
         #temporaryMessage: r'temporaryMessage',
         #tooltip: r'tooltip',
+        #upAction: r'upAction',
         #value: r'value',
         #valueAttr: r'valueAttr',
         #vertical: r'vertical',
         #visible: r'visible',
+        #z: r'z',
       }));
   configureForDeployment([
       () => Polymer.register('spark-widget', i0.SparkWidget),
@@ -527,10 +540,9 @@ void main() {
       () => Polymer.register('spark-splitter', i15.SparkSplitter),
       () => Polymer.register('spark-split-view', i16.SparkSplitView),
       () => Polymer.register('spark-status', i17.SparkStatus),
-      () => Polymer.register('cde-polymer-designer', i18.CdePolymerDesigner),
-      () => Polymer.register('commit-message-view', i19.CommitMessageView),
-      () => Polymer.register('goto-line-view', i20.GotoLineView),
-      () => Polymer.register('spark-polymer-ui', i21.SparkPolymerUI),
+      () => Polymer.register('commit-message-view', i18.CommitMessageView),
+      () => Polymer.register('goto-line-view', i19.GotoLineView),
+      () => Polymer.register('spark-polymer-ui', i20.SparkPolymerUI),
     ]);
-  i22.main();
+  i21.main();
 }

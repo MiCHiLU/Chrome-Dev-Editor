@@ -10,11 +10,11 @@
  *
  * Generally, a Grinder implementation will look something like this:
  *     void main([List<String> args]) {
- *       defineTask('init', taskFunction: init);
- *       defineTask('compile', taskFunction: compile, depends: ['init']);
- *       defineTask('deploy', taskFunction: deploy, depends: ['compile']);
- *       defineTask('docs', taskFunction: deploy, depends: ['init']);
- *       defineTask('all', depends: ['deploy', 'docs']);
+ *       task('init', init);
+ *       task('compile', compile, ['init']);
+ *       task('deploy', deploy, ['compile']);
+ *       task('docs', deploy, ['init']);
+ *       task('all', ['deploy', 'docs']);
  *
  *       startGrinder(args);
  *     }
@@ -38,7 +38,7 @@
 library grinder;
 
 export 'grinder_files.dart';
-export 'grinder_utils.dart';
+export 'grinder_tools.dart';
 
 import 'dart:async';
 import 'dart:io';
@@ -57,7 +57,7 @@ List<String> grinderArgs() => _args;
 
 /**
  * Add a new task to the global [Grinder] instance. Some combination of this
- * and [defineTask] should be called before [startGrinder] is invoked.
+ * and [task] should be called before [startGrinder] is invoked.
  */
 void addTask(GrinderTask task) => _grinder.addTask(task);
 
@@ -67,7 +67,7 @@ void addTask(GrinderTask task) => _grinder.addTask(task);
  * Any dependencies of the task, that need to run before it, should be passed
  * in via [depends].
  */
-void defineTask(String name, {TaskFunction taskFunction, List<String> depends : const []}) {
+void task(String name, [TaskFunction taskFunction, List<String> depends = const []]) {
   _grinder.addTask(
       new GrinderTask(name, taskFunction: taskFunction, depends: depends));
 }
@@ -115,7 +115,7 @@ ArgParser _createArgsParser() {
 }
 
 void _printUsage(ArgParser parser, Grinder grinder) {
-  print('usage: dart ${Platform.script} <options> target1 target2 ...');
+  print('usage: dart ${_currentScript()} <options> target1 target2 ...');
   print('');
   print('valid options:');
   print(parser.getUsage().replaceAll('\n\n', '\n'));
@@ -125,10 +125,18 @@ void _printUsage(ArgParser parser, Grinder grinder) {
     print('valid targets:');
 
     List<GrinderTask> tasks = grinder.tasks.toList();
-    tasks.sort((t1, t2) => t1.name.compareTo(t2.name));
     tasks.forEach(
         (t) => t.description == null ? print("  ${t}") : print("  ${t} ${t.description}"));
   }
+}
+
+String _currentScript() {
+  String script = Platform.script.toString();
+  String uriBase = Uri.base.toString();
+  if (script.startsWith(uriBase)) {
+    script = script.substring(uriBase.length);
+  }
+  return script;
 }
 
 void _printDeps(Grinder grinder) {
@@ -142,7 +150,6 @@ void _printDeps(Grinder grinder) {
     print('');
 
     List<GrinderTask> tasks = grinder.tasks.toList();
-    tasks.sort((t1, t2) => t1.name.compareTo(t2.name));
     tasks.forEach((GrinderTask t) {
       t.description == null ? print("${t}") : print("  ${t} ${t.description}");
 
@@ -185,25 +192,26 @@ class GrinderContext {
 
 /**
  * This class represents a Grinder task. These are created automatically by
- * the [defineTask] function.
+ * the [task] function.
  */
 class GrinderTask {
   /// The name of the task.
   final String name;
-  /// An optional description of the task.
-  final String description;
   /// The function to execute when starting this task.
   TaskFunction taskFunction;
   /// The list of task dependencies; tasks that must run before this task should
   /// execute.
   List<String> depends;
+  /// An optional description of the task.
+  final String description;
 
   /**
    * Create a new [GrinderTask]. A name is required; a [description],
-   * [taskFunction] to execute when this task is started, and a [depends] list
+   * [run] to execute when this task is started, and a [depends] list
    * are optional.
    */
-  GrinderTask(this.name, {this.description, this.taskFunction, this.depends : const []});
+  GrinderTask(this.name,
+      {this.taskFunction, this.depends : const [], this.description});
 
   /**
    * This method is invoked when the task is started. If a task was created with
