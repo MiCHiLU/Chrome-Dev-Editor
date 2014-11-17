@@ -147,12 +147,12 @@
       }
    },
    "update_url": "https://clients2.google.com/service/update2/crx",
-   "version": "0.17.3361",
+   "version": "0.17.3371",
    "webview": {
       "partitions": [ {
          "accessible_resources": [ "*" ],
          "name": "cde-polymer-designer"
       } ]
    },
-   "x-spark-revision": "2bdc4f11d2fdc554c057fa16a448827c6cd4fb65"
+   "x-spark-revision": "1b7d6c81dee2a479ee2f5ce535946c2b415fba91"
 }
