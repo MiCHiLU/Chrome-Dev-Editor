@@ -19,10 +19,14 @@
 
 #include "git_command.h"
 
+class GitAdd;
 class GitClone;
 class GitCommit;
 class GitCurrentBranch;
 class GitGetBranches;
+class GitInit;
+class GitLsRemote;
+class GitStatus;
 
 /// The Instance class.  One of these exists for each instance of your NaCl
 /// module on the web page.  The browser will ask the Module object to create
@@ -61,11 +65,19 @@ class GitSaltInstance : public pp::Instance {
 
   int Clone(int32_t r, GitClone* clone);
 
+  int InitRepo(int32_t r, GitInit* init);
+
   int Commit(int32_t r, GitCommit* commit);
 
   int CurrentBranch(int32_t r, GitCurrentBranch* branch);
 
   int GetBranches(int32_t r, GitGetBranches* getBranches);
+
+  int Add(int32_t, GitAdd* add);
+
+  int Status(int32_t r, GitStatus* status);
+
+  int LsRemote(int32_t r, GitLsRemote* lsRemote);
 
   void OpenFileSystem(int32_t /* result */);
 

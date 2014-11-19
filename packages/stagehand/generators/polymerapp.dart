@@ -14,7 +14,8 @@ import 'polymerapp_data.dart';
 class PolymerAppGenerator extends DefaultGenerator {
   PolymerAppGenerator() : super(
       'polymerapp',
-      "A polymer.dart web app.",
+      'Polymer Web Application',
+      'A web app built using polymer.dart.',
       categories: const ['dart', 'web']) {
 
     for (TemplateFile file in decodeConcanenatedData(data)) {
@@ -23,4 +24,7 @@ class PolymerAppGenerator extends DefaultGenerator {
 
     setEntrypoint(getFile('web/index.html'));
   }
+
+  String getInstallInstructions() => "${super.getInstallInstructions()}\n"
+      "to run your app, use 'pub serve'";
 }

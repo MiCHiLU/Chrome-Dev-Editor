@@ -32,9 +32,11 @@
       "scopes": [ "https://www.googleapis.com/auth/chromewebstore" ]
    },
    "offline_enabled": true,
-   "permissions": [ "http://*/*", "https://*/*", "identity", "clipboardRead", "clipboardWrite", "developerPrivate", {
+   "permissions": [ "http://*/*", "https://*/*", "clipboardRead", "clipboardWrite", "contextMenus", "developerPrivate", {
       "fileSystem": [ "write", "retainEntries", "directory" ]
-   }, "management", "nativeMessaging", "syncFileSystem", "system.network", "storage", "unlimitedStorage", "contextMenus", "usb", {
+   }, "identity", "management", "nativeMessaging", {
+      "socket": [ "tcp-connect", "resolve-host" ]
+   }, "storage", "syncFileSystem", "system.network", "unlimitedStorage", "usb", {
       "usbDevices": [ {
          "description": "0x22b8/0x2e62 Moto X (XT1053)",
          "productId": 11874,
@@ -147,12 +149,12 @@
       }
    },
    "update_url": "https://clients2.google.com/service/update2/crx",
-   "version": "0.17.3371",
+   "version": "0.17.3404",
    "webview": {
       "partitions": [ {
          "accessible_resources": [ "*" ],
          "name": "cde-polymer-designer"
       } ]
    },
-   "x-spark-revision": "1b7d6c81dee2a479ee2f5ce535946c2b415fba91"
+   "x-spark-revision": "85f1ffc84ac7e19d5a3ffe16eea315a742edd68e"
 }

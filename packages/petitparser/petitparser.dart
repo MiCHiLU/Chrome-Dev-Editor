@@ -159,6 +159,7 @@ part 'src/core/characters.dart';
 part 'src/core/combinators.dart';
 part 'src/core/composite.dart';
 part 'src/core/context.dart';
+part 'src/core/definition.dart';
 part 'src/core/expression.dart';
 part 'src/core/parser.dart';
 part 'src/core/parsers.dart';

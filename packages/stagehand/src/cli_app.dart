@@ -18,7 +18,7 @@ import 'package:stagehand/src/common.dart';
 const String APP_NAME = 'stagehand';
 
 // This version must be updated in tandem with the pubspec version.
-const String APP_VERSION = '0.1.2';
+const String APP_VERSION = '0.1.3+1';
 
 // The Google Analytics tracking ID for stagehand.
 const String _GA_TRACKING_ID = 'UA-55033590-1';
@@ -69,8 +69,13 @@ class CliApp {
     if (options.wasParsed('analytics')) {
       analytics.optIn = options['analytics'];
       _out("Analytics ${analytics.optIn ? 'enabled' : 'disabled'}.");
-      if (analytics.optIn) analytics.sendScreenView('analytics');
-      return new Future.value();
+      Future f;
+      if (analytics.optIn) {
+        f = _timeout(analytics.sendScreenView('analytics'));
+      } else {
+        f = new Future.value();
+      }
+      return f;
     }
 
     // This hidden option is used so that our build bots don't emit data.
@@ -78,12 +83,17 @@ class CliApp {
       analytics = new AnalyticsMock();
     }
 
+    if (options['version']) {
+      _out('${APP_NAME} version ${APP_VERSION}');
+      return new Future.value();
+    }
+
     if (options['help'] || args.isEmpty) {
       // Prompt to opt into advanced analytics.
       if (!analytics.hasSetOptIn) {
         _out("Welcome to Stagehand! We collect anonymous usage statistics and crash reports in");
         _out("order to improve the tool (http://goo.gl/6wsncI). Would you like to opt-in to");
-        io.stdout.write("additional analytics to help us improve Stagehand [y/yes/no]? ");
+        _out("additional analytics to help us improve Stagehand [y/yes/no]? ");
         io.stdout.flush();
         String response = io.stdin.readLineSync();
         response = response.toLowerCase().trim();
@@ -91,9 +101,9 @@ class CliApp {
         _out('');
       }
 
-      _screenView(options['help'] ? 'help' : 'main');
+      Future f = _screenView(options['help'] ? 'help' : 'main');
       _usage(argParser);
-      return new Future.value();
+      return _timeout(f);
     }
 
     // The `--machine` option emits the list of available generators to stdout
@@ -101,10 +111,10 @@ class CliApp {
     // output of `--help`. It's an undocumented command line flag, and may go
     // away or change.
     if (options['machine']) {
-      _screenView('machine');
+      Future f = _screenView('machine');
 
       logger.stdout(_createMachineInfo(generators));
-      return new Future.value();
+      return _timeout(f);
     }
 
     if (options.rest.isEmpty) {
@@ -157,36 +167,41 @@ class CliApp {
 
     _out("Creating ${generatorName} application '${projectName}':");
 
-    _screenView('create');
-    analytics.sendEvent('create', generatorName, generator.description);
+    List<Future> futures = [];
 
-    return generator.generate(projectName, target).then((_) {
+    futures.add(_screenView('create'));
+    futures.add(analytics.sendEvent(
+        'create', generatorName, generator.description));
+
+    String author = options['author'];
+
+    Map vars = {'author': author};
+
+    Future f = generator.generate(projectName, target, additionalVars: vars);
+    return f.then((_) {
       _out("${generator.numFiles()} files written.");
-    });
-  }
 
-  String _createMachineInfo(List<Generator> generators) {
-    Iterable itor = generators.map((Generator generator) {
-      Map m = {
-        'name': generator.id,
-        'description': generator.description
-      };
-
-      if (generator.entrypoint != null) {
-        m['entrypoint'] = generator.entrypoint.path;
+      String message = generator.getInstallInstructions();
+      if (message != null && message.isNotEmpty) {
+        message = message.trim();
+        message = message.split('\n').map((line) => "--> ${line}").join("\n");
+        _out("\n${message}");
       }
-
-      return m;
+    }).then((_) {
+      return _timeout(Future.wait(futures));
     });
-    return JSON.encode(itor.toList());
   }
 
   ArgParser _createArgParser() {
     var argParser = new ArgParser();
 
-    argParser.addFlag('help', abbr: 'h', negatable: false, help: 'Help!');
     argParser.addFlag('analytics', negatable: true,
         help: 'Opt-out of anonymous usage and crash reporting.');
+    argParser.addFlag('help', abbr: 'h', negatable: false, help: 'Help!');
+    argParser.addFlag('version', negatable: false,
+        help: 'Display the version for Stagehand.');
+    argParser.addOption('author', defaultsTo: '<your name>',
+        help: 'The author name to use for file headers.');
 
     // This option is deprecated and will go away.
     argParser.addOption('outdir', abbr: 'o', valueHelp: 'path', hide: true);
@@ -201,6 +216,23 @@ class CliApp {
     argParser.addFlag('mock-analytics', negatable: false, hide: true);
 
     return argParser;
+  }
+
+  String _createMachineInfo(List<Generator> generators) {
+    Iterable itor = generators.map((Generator generator) {
+      Map m = {
+        'name': generator.id,
+        'label': generator.label,
+        'description': generator.description
+      };
+
+      if (generator.entrypoint != null) {
+        m['entrypoint'] = generator.entrypoint.path;
+      }
+
+      return m;
+    });
+    return JSON.encode(itor.toList());
   }
 
   String _validateName(String projectName) {
@@ -218,8 +250,9 @@ class CliApp {
 
   void _usage(ArgParser argParser) {
     _out('Stagehand will generate the given application type into the current directory.');
+    _out('');
     _out('usage: ${APP_NAME} <generator-name>');
-    _out(argParser.getUsage());
+    _out(argParser.usage);
     _out('');
     _out('Available generators:');
     int len = generators
@@ -236,10 +269,10 @@ class CliApp {
 
   void _out(String str) => logger.stdout(str);
 
-  void _screenView(String view) {
+  Future _screenView(String view) {
     // If the user hasn't opted in, only send a version check - no page data.
     if (!analytics.optIn) view = 'main';
-    analytics.sendScreenView(view);
+    return analytics.sendScreenView(view);
   }
 
   /**
@@ -253,6 +286,19 @@ class CliApp {
         .where((entity) => entity is io.Directory)
         .where((entity) => !isHiddenDir(entity))
         .isEmpty;
+  }
+
+  /**
+   * Return a future that always completes in no more then 500 ms.
+   *
+   * In addition, it (optionally) does not report any exceptions from the
+   * underlying `Future`.
+   */
+  Future _timeout(Future f, {bool quiet: false}) {
+    if (quiet) {
+      f = f.catchError((e) => null);
+    }
+    return f.timeout(new Duration(milliseconds: 500), onTimeout: () => null);
   }
 }
 

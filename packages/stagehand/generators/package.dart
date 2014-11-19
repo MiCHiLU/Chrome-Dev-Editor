@@ -14,7 +14,8 @@ import 'package_data.dart';
 class PackageGenerator extends DefaultGenerator {
   PackageGenerator() : super(
       'package',
-      "A library useful for applications or for sharing on pub.dartlang.org.",
+      'Dart Package',
+      'A starting point for Dart libraries or applications.',
       categories: const ['dart']) {
 
     for (TemplateFile file in decodeConcanenatedData(data)) {

@@ -29,7 +29,7 @@ import 'generators/consoleapp.dart';
 import 'generators/webapp.dart';
 import 'generators/package.dart';
 import 'generators/polymerapp.dart';
-import 'generators/shelfapp.dart';
+import 'generators/shelfserver.dart';
 import 'src/common.dart';
 
 /// A curated, prescriptive list of Dart project generators.
@@ -37,7 +37,7 @@ final List<Generator> generators = [
   new ConsoleAppGenerator(),
   new PackageGenerator(),
   new PolymerAppGenerator(),
-  new ShelfAppGenerator(),
+  new ShelfServerGenerator(),
   new WebAppGenerator()
 ];
 
@@ -51,13 +51,14 @@ Generator getGenerator(String id) {
  */
 abstract class Generator implements Comparable<Generator> {
   final String id;
+  final String label;
   final String description;
   final List<String> categories;
 
   final List<TemplateFile> files = [];
   TemplateFile _entrypoint;
 
-  Generator(this.id, this.description, {this.categories: const []});
+  Generator(this.id, this.label, this.description, {this.categories: const []});
 
   /**
    * The entrypoint of the application; the main file for the project, which an
@@ -91,12 +92,21 @@ abstract class Generator implements Comparable<Generator> {
     this._entrypoint = entrypoint;
   }
 
-  Future generate(String projectName, GeneratorTarget target) {
+  Future generate(String projectName, GeneratorTarget target,
+      {Map<String, String> additionalVars}) {
     Map vars = {
       'projectName': projectName,
       'description': description,
       'year': new DateTime.now().year.toString()
     };
+
+    additionalVars.keys.forEach((key) {
+      vars[key] = additionalVars[key];
+    });
+
+    if (!vars.containsKey('author')) {
+      vars['author'] = '<your name>';
+    }
 
     return Future.forEach(files, (TemplateFile file) {
       var resultFile = file.runSubstitution(vars);
@@ -108,10 +118,16 @@ abstract class Generator implements Comparable<Generator> {
 
   int numFiles() => files.length;
 
-  String toString() => '[${id}: ${description}]';
-
   int compareTo(Generator other) =>
       this.id.toLowerCase().compareTo(other.id.toLowerCase());
+
+  /**
+   * Return some user facing instructions about how to finish installation of
+   * the template.
+   */
+  String getInstallInstructions() => '';
+
+  String toString() => '[${id}: ${description}]';
 }
 
 /**

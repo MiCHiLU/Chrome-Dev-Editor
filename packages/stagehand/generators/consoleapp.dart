@@ -14,7 +14,8 @@ import 'consoleapp_data.dart';
 class ConsoleAppGenerator extends DefaultGenerator {
   ConsoleAppGenerator() : super(
       'consoleapp',
-      "A minimal command-line application.",
+      'Console Application',
+      'A simple command-line application.',
       categories: const ['dart', 'console', 'minimal']) {
 
     for (TemplateFile file in decodeConcanenatedData(data)) {
@@ -23,4 +24,7 @@ class ConsoleAppGenerator extends DefaultGenerator {
 
     setEntrypoint(getFile('bin/main.dart'));
   }
+
+  String getInstallInstructions() => "${super.getInstallInstructions()}\n"
+      "run your app using 'dart ${entrypoint.path}'";
 }
