@@ -14,6 +14,7 @@ import 'package:chrome_testing/testing_app.dart';
 import 'package:intl/intl.dart';
 import 'package:logging/logging.dart';
 import 'package:path/path.dart' as path;
+import 'package:spark_widgets/spark_button/spark_button.dart';
 import 'package:spark_widgets/spark_dialog/spark_dialog.dart';
 import 'package:spark_widgets/spark_dialog_button/spark_dialog_button.dart';
 import 'package:spark_widgets/spark_progress/spark_progress.dart';
@@ -31,6 +32,7 @@ import 'lib/decorators.dart';
 import 'lib/dart/dart_builder.dart';
 import 'lib/editors.dart';
 import 'lib/editor_area.dart';
+import 'lib/editor_config.dart';
 import 'lib/event_bus.dart';
 import 'lib/exception.dart';
 import 'lib/files_mock.dart';
@@ -41,6 +43,7 @@ import 'lib/jobs.dart';
 import 'lib/launch.dart';
 import 'lib/mobile/android_rsa.dart';
 import 'lib/mobile/deploy.dart';
+import 'lib/mobile/usb.dart';
 import 'lib/navigation.dart';
 import 'lib/package_mgmt/pub.dart';
 import 'lib/package_mgmt/bower.dart';
@@ -344,6 +347,8 @@ abstract class Spark
   void initNavigationManager() {
     _navigationManager = new NavigationManager(_editorManager);
     _navigationManager.onNavigate.listen((NavigationLocation location) {
+      if (location == null) return;
+
       _selectFile(location.file).then((_) {
         if (location.selection != null) {
           nextTick().then((_) => _selectLocation(location));
@@ -401,19 +406,13 @@ abstract class Spark
   }
 
   void initAceManager() {
-    _aceManager = new AceManager(
-        querySelector('#aceContainer'), this, services, prefs);
+    _aceManager = new AceManager(this, services, prefs);
 
     syncPrefs.getValue('textFileExtensions').then((String value) {
       if (value != null) {
         _textFileExtensions.addAll(JSON.decode(value));
       }
     });
-
-    if (workspace.getFiles().length == 0) {
-      // No files, just focus the editor.
-      aceManager.focus();
-    }
 
     _aceThemeManager = new ThemeManager(
         _aceManager, prefs, getUIElement('#changeTheme .settings-value'));
@@ -1737,7 +1736,7 @@ class SpecificTabAction extends SparkAction {
 
     // Ctrl-1 to Ctrl-8. The user types in a 1-based key event; we convert that
     // into a 0-based into into the tabs.
-    spark.editorArea.selectedTab = spark.editorArea.tabs[_binding.index - 1];
+    spark.editorArea.focusTab(spark.editorArea.tabs[_binding.index - 1]);
   }
 }
 
@@ -2175,8 +2174,8 @@ class HistoryAction extends SparkAction {
     _init(true);
   }
 
-  void _init(bool value) {
-    _forward = value;
+  void _init(bool forward) {
+    _forward = forward;
     enabled = false;
 
     spark.navigationManager.onNavigate.listen((_) {
@@ -2195,6 +2194,7 @@ class HistoryAction extends SparkAction {
     } else {
       spark.navigationManager.goBack();
     }
+    spark.editorArea.selectedTab.focus();
   }
 }
 
@@ -2241,16 +2241,7 @@ class BuildApkAction extends SparkActionWithDialog {
 
 class NewProjectAction extends SparkActionWithDialog {
   InputElement _nameElt;
-
-  // TODO(ussuri): Eliminate this and dependencies as per BUG #3619.
-  static const _KNOWN_JS_PACKAGES = const {
-      'polymer': 'Polymer/polymer#master',
-      'core-elements': 'Polymer/core-elements#master',
-      'paper-elements': 'Polymer/paper-elements#master'
-  };
-  // Matches: "proj-template", "proj-template;polymer,core-elements".
-  // TODO(ussuri): Set to '([\/\w_-]+)' when fixing BUG #3619.
-  static final _TEMPLATE_REGEX = new RegExp(r'([\/\w_-]+)(;(([\w-],?)+))?');
+  SelectElement get _typeElt => getElement('select[name="type"]');
 
   NewProjectAction(Spark spark, Element dialog)
       : super(spark, "project-new", "New Project…", dialog) {
@@ -2282,7 +2273,7 @@ class NewProjectAction extends SparkActionWithDialog {
       }
 
       ws.WorkspaceRoot root = filesystem.fileSystemAccess.getRootFor(location);
-      final List<ProjectTemplate> templates = [];
+      List<ProjectTemplate> templates;
 
       // TODO(ussuri): Can this no-op `return Future.value()` be removed?
       return new Future.value().then((_) {
@@ -2291,33 +2282,11 @@ class NewProjectAction extends SparkActionWithDialog {
             new TemplateVar('sourceName', name.toLowerCase())
         ];
 
-        // Add a template for the main project type.
-        final SelectElement projectTypeElt = getElement('select[name="type"]');
-        final Match match = _TEMPLATE_REGEX.matchAsPrefix(projectTypeElt.value);
-        assert(match.groupCount > 0);
-        final String templId = match.group(1);
-        final String jsDepsStr = match.group(3);
+        _analyticsTracker.sendEvent('action', 'project-new', _typeElt.value);
 
-        _analyticsTracker.sendEvent('action', 'project-new', templId);
-        templates.add(new ProjectTemplate(templId, globalVars));
-
-        // Possibly also add a mix-in template for JS dependencies, if the
-        // project type requires them.
-        if (jsDepsStr != null) {
-          List<String> jsDeps = [];
-          for (final depName in jsDepsStr.split(',')) {
-            final String depPath = _KNOWN_JS_PACKAGES[depName];
-            assert(depPath != null);
-            jsDeps.add('"$depName": "$depPath"');
-          }
-          if (jsDeps.isNotEmpty) {
-            final localVars = [
-                new TemplateVar('dependencies', jsDeps.join(',\n    '))
-            ];
-            templates.add(
-                new ProjectTemplate("addons/bower_deps", globalVars, localVars));
-          }
-        }
+        // Add templates to be used to create the project.
+        final List<String> ids = _typeElt.value.split('+');
+        templates = ids.map((id) => new ProjectTemplate(id, globalVars));
 
         return new ProjectBuilder(location.entry, templates, spark).build();
       }).then((_) {
@@ -2385,6 +2354,9 @@ class DeployToMobileDialog extends SparkActionWithProgressDialog {
   CheckboxInputElement _adbElement;
   InputElement _pushUrlElement;
   InputElement _liveDeployCheckBox;
+  SelectElement _usbDevices;
+  SparkButton _addDeviceButton;
+  int _selectedDeviceIndex = -1;
   ws.Container deployContainer;
   ProgressMonitor _monitor;
   ws.Resource _resource;
@@ -2393,13 +2365,26 @@ class DeployToMobileDialog extends SparkActionWithProgressDialog {
       : super(spark, "deploy-app-old", "Deploy to Mobile", dialog) {
     _ipElement = getElement("#ip");
     _adbElement = getElement("#adb");
+    _usbDevices = getElement("#usbDevices");
     _liveDeployCheckBox = getElement("#liveDeploy");
     _pushUrlElement = _triggerOnReturn("#pushUrl");
+    _addDeviceButton = getElement('#addDevice');
 
     _ipElement.onChange.listen(_enableInputs);
     _adbElement.onChange.listen(_enableInputs);
     _liveDeployCheckBox.onChange.listen((_) =>
         spark.localPrefs.setValue("live-deployment", _liveDeployCheckBox.checked));
+    if (SparkFlags.enableNewUsbApi) {
+      _usbDevices.hidden = false;
+
+      _loadUsbDevices();
+      _addDeviceButton.onClick.listen((e) {
+        _addDevice();
+      });
+      _usbDevices.onChange.listen((e) {
+        _selectedDeviceIndex = _usbDevices.selectedIndex;
+      });
+    }
     _enableInputs();
   }
 
@@ -2425,13 +2410,40 @@ class DeployToMobileDialog extends SparkActionWithProgressDialog {
       spark.showErrorMessage(
           'Unable to deploy', message: 'No USB devices available.');
     } else {
+       MobileDeploy deployer = new MobileDeploy(deployContainer, spark.localPrefs);
       _restoreDialog();
       _show();
     }
   }
 
+  Future<List> _loadDevices() => UsbUtil.getDevices();
+
+  void _loadUsbDevices() {
+    _usbDevices.length = 0;
+    _loadDevices().then((deviceInfos) {
+      deviceInfos.forEach((info) {
+        String option =
+            "(productId:${info['productId']}, vendorId:${info['vendorId']})";
+        String value = "${info['productId']}:${info['vendorId']}";
+        _usbDevices.append(new OptionElement(data: option, value: value ));
+      });
+    });
+  }
+
+   /**
+   * Opens a dialog and provides a list of active adb devices to select from.
+   * It allows to select a single device at a time.
+  */
+  Future _addDevice() {
+    return UsbUtil.getUserSelectedDevices().then((devices) {
+      _loadUsbDevices();
+    });
+  }
+
   void _enableInputs([_]) {
     _pushUrlElement.disabled = !_ipElement.checked;
+    _usbDevices.disabled = _ipElement.checked;
+    _addDeviceButton.disabled = _ipElement.checked;
   }
 
   void _toggleProgressVisible(bool visible) {
@@ -2454,11 +2466,25 @@ class DeployToMobileDialog extends SparkActionWithProgressDialog {
 
     MobileDeploy deployer = new MobileDeploy(deployContainer, spark.localPrefs);
 
-    // Invoke the deployer methods in Futures in order to capture exceptions.
-    Future f = new Future(() {
-      return useAdb ?
-          deployer.pushAdb(_monitor) : deployer.pushToHost(url, _monitor);
-    });
+    Future f;
+
+    if (useAdb && SparkFlags.enableNewUsbApi == true) {
+      int index = _usbDevices.selectedIndex;
+       String deviceInfo =
+           (_usbDevices.children[index] as OptionElement).value;
+       List<String> info = deviceInfo.split(':');
+       int productId = int.parse(info[0]);
+       int vendorId = int.parse(info[1]);
+       f = new Future(() {
+         return deployer.pushAdb(_monitor, productId: productId, vendorId: vendorId);
+       });
+    } else {
+      // Invoke the deployer methods in Futures in order to capture exceptions.
+      f = new Future(() {
+        return useAdb ?
+            deployer.pushAdb(_monitor) : deployer.pushToHost(url, _monitor);
+      });
+    }
 
     _monitor.runCancellableFuture(f).then((_) {
       _hide();

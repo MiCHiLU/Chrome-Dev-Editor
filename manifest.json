@@ -9,7 +9,6 @@
    "description": "__MSG_app_description__",
    "file_handlers": {
       "text": {
-         "title": "__MSG_app_name__",
          "types": [ "application/dart", "application/javascript", "text/css", "text/dart", "text/html", "text/javascript", "text/json", "text/xml", "text/yaml" ]
       }
    },
@@ -25,7 +24,7 @@
    },
    "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA2OvldPjAqgEboHyyZM7GpCMmGMSQ8aExOlQyOhN3C9fDRXqnAN/Ie20TEwD9Eb2CciV3Ru4Gm7PmDnkHzsljD84qLgBdN39FzPGDyViXTS442xTElWRZMZQfJYQpbMpiePL720kTHgLLAcwTgdP9DnvRPrKukIs/U4Y76NFk7NNbsNOc6FWisLJykw2POTB1RR5ZlZrA4Ax1P7kt7qQdomE6i8wy1TA1jDhG8AhEXKRfpyELvJmzyVIyR9uiSHDHCdihiS5oyjADjmmbklvL7Ns0cSAgEX/lWN8UX8r17zoKZzJ0MkmCQ5Nlfql8qUtn2oZXaHztkkAcXCxkq9/37QIDAQAB",
    "manifest_version": 2,
-   "minimum_chrome_version": "37",
+   "minimum_chrome_version": "38",
    "name": "__MSG_app_name__",
    "oauth2": {
       "client_id": "450494089748-t8dpd0irtkfhh76g5dq54gjnut5ipggp.apps.googleusercontent.com",
@@ -134,8 +133,12 @@
          "productId": 20815,
          "vendorId": 4046
       }, {
-         "description": "0x1004/0x618e LG Ally/Optimus One/Vortex ",
+         "description": "0x1004/0x618e LG Ally/Optimus One/Vortex",
          "productId": 24974,
+         "vendorId": 4100
+      }, {
+         "description": "0x1004/0x61f9 LG Optimus Vu3",
+         "productId": 25081,
          "vendorId": 4100
       } ]
    }, "webview" ],
@@ -149,12 +152,12 @@
       }
    },
    "update_url": "https://clients2.google.com/service/update2/crx",
-   "version": "0.17.3412",
+   "version": "0.18.3465",
    "webview": {
       "partitions": [ {
          "accessible_resources": [ "*" ],
          "name": "cde-polymer-designer"
       } ]
    },
-   "x-spark-revision": "5cd6f6fc7b409f132288a86a8e5db67e9561bab4"
+   "x-spark-revision": "38bfe0efa1fd370f437d93ac7965e0651d61f4fb"
 }

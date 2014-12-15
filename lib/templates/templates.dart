@@ -15,12 +15,12 @@ import '../package_mgmt/bower_properties.dart';
 import '../utils.dart' as utils;
 import '../workspace.dart';
 
-part 'addons/bower_deps/template.dart';
 part 'chrome/chrome_app_polymer_js/template.dart';
 part 'polymer/template.dart';
 part 'polymer/polymer_element_dart/template.dart';
 part 'polymer/polymer_element_js/template.dart';
 part 'polymer/spark_widget/template.dart';
+part 'stagehand/template.dart';
 
 /**
  * Specifies a variable-to-value substitution in a template file text.
@@ -115,8 +115,6 @@ abstract class ProjectTemplate {
     }
 
     switch (id) {
-      case 'addons/bower_deps':
-        return new BowerDepsTemplate(id, globalVars, localVars);
       case 'chrome/chrome_app_polymer_js':
         return new ChromeAppWithPolymerJSTemplate(id, globalVars, localVars);
       case 'polymer/polymer_element_js':
@@ -242,54 +240,5 @@ class SparkProjectTemplate implements ProjectTemplate {
         }
       });
     });
-  }
-}
-
-class StagehandProjectTemplate implements ProjectTemplate {
-  final String id;
-
-  StagehandProjectTemplate(this.id, List<TemplateVar> globalVars,
-      List<TemplateVar> localVars);
-
-  Future instantiate(DirectoryEntry destination) {
-    stagehand.Generator generator = stagehand.getGenerator(id);
-    var target = new _StagehandGeneratorTarget(destination);
-    return generator.generate(_normalizeName(destination.name), target,
-        additionalVars: {});
-  }
-
-  Future showIntro(Project finalProject, utils.Notifier notifier) {
-    return new Future.value();
-  }
-
-  String _normalizeName(String name) => name.replaceAll('-', '_');
-}
-
-class _StagehandGeneratorTarget implements stagehand.GeneratorTarget {
-  final DirectoryEntry root;
-
-  _StagehandGeneratorTarget(this.root);
-
-  Future createFile(String path, List<int> contents) {
-    List<String> segments = path.split('/');
-    return _createFile(root, segments.take(segments.length - 1),
-        segments.last, contents);
-  }
-
-  Future _createFile(DirectoryEntry dir, Iterable<String> dirs, String fileName,
-      List<int> contents) {
-    if (dirs.isNotEmpty) {
-      return dir.createDirectory(dirs.first).then((DirectoryEntry newDir) {
-        return _createFile(newDir, dirs.skip(1), fileName, contents);
-      });
-    } else {
-      return dir.createFile(fileName).then((entry) {
-        if (entry is chrome.ChromeFileEntry) {
-          return entry.writeBytes(new chrome.ArrayBuffer.fromBytes(contents));
-        } else {
-          return new Future.error('todo');
-        }
-      });
-    }
   }
 }
